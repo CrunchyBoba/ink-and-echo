@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SYN-1 Translator</title>
+  <meta name="description" content="Hear a painting, see a song. SYN-1 translates artwork into sound and sound into artwork, entirely in your browser.">
+  <meta name="theme-color" content="#000000">
+  <meta property="og:title" content="SYN-1 Translator">
+  <meta property="og:description" content="Hear a painting, see a song. Twenty ways to translate between image and sound.">
+  <meta property="og:image" content="assets/img/preview.jpg">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Michroma&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script type="module" src="assets/js/app.js"></script>
+</head>
+<body>
+
+  <!-- ============ INTRO ============ -->
+  <div class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+    <div class="intro-inner">
+      <h1 class="intro-mark" id="intro-title"><span class="mark">SYN-1</span> <span class="light">Translator</span></h1>
+      <p class="intro-text">
+        A painting you can hear and a song you can see. SYN-1 reads artwork as a grid of
+        light and color and plays it as music, then listens to music and paints it back.
+        Twenty translation methods, all running in your browser: your files never leave your device.
+      </p>
+      <p class="intro-note">Made for ART&nbsp;1901 · Project&nbsp;3: <em>On Value</em></p>
+      <button class="btn btn-enter" id="enter" type="button">Enter</button>
+    </div>
+  </div>
+
+  <!-- ============ TOP BAR ============ -->
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="SYN-1 Translator, back to top">
+      <span class="mark">SYN-1</span><span class="light">Translator</span>
+    </a>
+
+    <nav class="modes" role="tablist" aria-label="Translation direction">
+      <button class="mode" role="tab" id="tab-a" data-mode="a" aria-selected="true" aria-controls="machine-a">
+        <span class="dot" aria-hidden="true"></span>Image <span class="arrow" aria-hidden="true">→</span><span class="sr-only">to</span> Sound
+      </button>
+      <button class="mode" role="tab" id="tab-b" data-mode="b" aria-selected="false" aria-controls="machine-b" tabindex="-1">
+        <span class="dot" aria-hidden="true"></span>Sound <span class="arrow" aria-hidden="true">→</span><span class="sr-only">to</span> Image
+      </button>
+    </nav>
+
+    <div class="engine" id="engine" aria-live="polite">
+      <span class="engine-label">Engine</span>
+      <span class="led" id="engine-led" data-state="loading" aria-hidden="true"></span>
+      <span class="engine-text" id="engine-text">Loading</span>
+    </div>
+
+    <button class="menu-btn" id="menu-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="menu" id="menu" hidden>
+      <a href="#about">About</a>
+      <a href="#how">How it works</a>
+      <a href="#methods">Methods</a>
+      <a href="#demos">Demos</a>
+      <a href="https://github.com/CrunchyBoba/image-sound-translator" target="_blank" rel="noopener">GitHub ↗</a>
+    </nav>
+  </header>
+
+  <main id="top" tabindex="-1">
+
+    <!-- ============ MACHINE A: IMAGE -> SOUND ============ -->
+    <section class="machine machine-a" id="machine-a" role="tabpanel" aria-labelledby="tab-a">
+      <div class="display display-a" id="a-display">
+        <label class="drop" id="a-drop">
+          <input type="file" id="a-file" accept="image/png,image/jpeg,image/webp,image/gif" class="sr-only">
+          <span class="drop-grid" aria-hidden="true"></span>
+          <span class="drop-title">Load an artwork</span>
+          <span class="drop-sub">Drop a painting, drawing or photo here, or click to choose. PNG, JPG or WEBP.</span>
+        </label>
+        <div class="grid-wrap" id="a-grid-wrap" hidden>
+          <ol class="row-labels" id="a-labels" aria-hidden="true"></ol>
+          <canvas class="grid-canvas" id="a-canvas" role="img" aria-label="The artwork as the dot grid the computer reads"></canvas>
+        </div>
+        <figure class="thumb" id="a-thumb" hidden>
+          <img id="a-thumb-img" alt="The artwork you loaded">
+          <figcaption id="a-thumb-cap"></figcaption>
+        </figure>
+      </div>
+
+      <div class="nameplate nameplate-a">
+        <span class="np-title">Image <span aria-hidden="true">→</span> Sound</span>
+        <span class="np-mid">Computer Translated</span>
+        <span class="np-model">SYN-1A</span>
+      </div>
+
+      <div class="strip strip-a">
+        <div class="panel panel-load">
+          <span class="panel-label">Artwork</span>
+          <button class="btn btn-small" type="button" id="a-load">Load</button>
+          <span class="file-name" id="a-file-name">None loaded</span>
+        </div>
+
+        <div class="panel panel-keys">
+          <span class="panel-label">Method</span>
+          <div class="keys keys-a" id="a-keys" role="radiogroup" aria-label="Image to sound method"></div>
+        </div>
+
+        <div class="panel panel-knobs">
+          <span class="panel-label">Tune</span>
+          <div class="knobs">
+            <div class="knob-field" data-knob="rows" data-min="12" data-max="48" data-step="1" data-value="36" data-label="Rows" data-unit=" pitches"></div>
+            <div class="knob-field" data-knob="step" data-min="0.05" data-max="1" data-step="0.05" data-value="0.25" data-label="Speed" data-unit=" s/col"></div>
+            <div class="knob-field" data-knob="detail" data-min="1" data-max="4" data-step="0.5" data-value="2" data-label="Detail" data-unit="×"></div>
+          </div>
+        </div>
+
+        <div class="panel panel-transport">
+          <span class="panel-label">Play</span>
+          <div class="transport">
+            <button class="btn btn-start" type="button" id="a-start" disabled>Start</button>
+            <button class="btn btn-stop" type="button" id="a-stop" disabled aria-label="Stop">Stop</button>
+            <span class="lamp" id="a-lamp" aria-hidden="true"></span>
+          </div>
+          <div class="time" id="a-time" aria-live="off">00:00 / 00:00</div>
+        </div>
+
+        <div class="panel panel-out">
+          <span class="panel-label">Export</span>
+          <a class="btn btn-small btn-disabled" id="a-wav" aria-disabled="true">WAV</a>
+          <a class="btn btn-small btn-disabled" id="a-midi" aria-disabled="true">MIDI</a>
+        </div>
+      </div>
+
+      <div class="readout readout-a" id="a-readout" aria-live="polite"></div>
+      <audio id="a-audio" preload="auto"></audio>
+    </section>
+
+    <!-- ============ MACHINE B: SOUND -> IMAGE ============ -->
+    <section class="machine machine-b" id="machine-b" role="tabpanel" aria-labelledby="tab-b" hidden>
+      <div class="display display-b" id="b-display">
+        <label class="drop drop-light" id="b-drop">
+          <input type="file" id="b-file" accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a" class="sr-only">
+          <span class="drop-wave" aria-hidden="true"></span>
+          <span class="drop-title">Load a sound</span>
+          <span class="drop-sub">Drop a song, voice memo or recording here, or click to choose. MP3, WAV, OGG, FLAC or M4A.</span>
+        </label>
+        <div class="stage" id="b-stage" hidden>
+          <div class="frame" id="b-frame">
+            <div class="frame-inner" id="b-frame-inner">
+              <img id="b-image" alt="">
+              <div class="follow" id="b-follow" aria-hidden="true"></div>
+            </div>
+            <div class="frame-empty" id="b-frame-empty">Pick a method below and press <strong>Run</strong>.</div>
+          </div>
+          <ul class="gallery" id="b-gallery" aria-label="Images made from this sound"></ul>
+        </div>
+      </div>
+
+      <div class="wave-strip" id="b-wave-strip" hidden>
+        <canvas id="b-wave" aria-label="Waveform of the loaded sound"></canvas>
+        <div class="wave-head" id="b-wave-head" aria-hidden="true"></div>
+      </div>
+
+      <div class="nameplate nameplate-b">
+        <span class="np-model">SYN-1B</span>
+        <span class="np-mid">Computer Translated</span>
+        <span class="np-title">Sound <span aria-hidden="true">→</span> Image</span>
+      </div>
+
+      <div class="strip strip-b">
+        <div class="panel panel-load panel-dark">
+          <span class="panel-label">Sound</span>
+          <button class="btn btn-small btn-light" type="button" id="b-load">Load</button>
+          <span class="file-name" id="b-file-name">None loaded</span>
+        </div>
+
+        <div class="panel panel-keys">
+          <span class="panel-label">Method</span>
+          <div class="keys keys-b" id="b-keys" role="radiogroup" aria-label="Sound to image method"></div>
+        </div>
+
+        <div class="panel panel-run">
+          <span class="panel-label">Paint</span>
+          <button class="btn btn-run" type="button" id="b-run" disabled>Run</button>
+          <button class="btn btn-small btn-light" type="button" id="b-all" disabled>Run all 12</button>
+        </div>
+
+        <div class="panel panel-listen">
+          <span class="panel-label">Listen</span>
+          <button class="btn btn-small btn-light" type="button" id="b-play" disabled aria-pressed="false">Play</button>
+          <div class="time" id="b-time">00:00 / 00:00</div>
+        </div>
+
+        <div class="panel panel-out panel-dark">
+          <span class="panel-label">Export</span>
+          <a class="btn btn-small btn-light btn-disabled" id="b-png" aria-disabled="true">PNG</a>
+        </div>
+      </div>
+
+      <div class="readout readout-b" id="b-readout" aria-live="polite"></div>
+      <audio id="b-audio" preload="auto"></audio>
+    </section>
+
+    <!-- ============ ABOUT ============ -->
+    <section class="section about" id="about">
+      <div class="section-head">
+        <span class="section-num">01</span>
+        <h2>About</h2>
+      </div>
+      <div class="about-grid">
+        <div class="about-lead">
+          <p class="lead">
+            In painting, <strong>value</strong> means how light or dark a color is.
+            Here it is also the material: brightness becomes loudness, and loudness becomes brightness.
+          </p>
+        </div>
+        <div class="about-body">
+          <p>
+            I built SYN-1 for ART&nbsp;1901 (Studio Art for Non-Majors), Project&nbsp;3: <em>On Value</em>.
+            The prompt asked for a time-based work made of, about, or with value. Value as a concept,
+            whether that's currency, hierarchy, time or dignity, and value as the medium.
+          </p>
+          <p>
+            The project started with a question: if a painting is translated for someone who can't see it,
+            or a song for someone who can't hear it, how much of its value survives the trip? Every method
+            here keeps something and throws something away. Squeezing a painting into 36 rows loses its
+            brushwork but keeps its composition; turning a song into mountains keeps its shape but loses its words.
+          </p>
+          <p>
+            Because translation goes both ways, you can close the loop: play a painting, then paint the sound
+            it made, and compare what came back.
+          </p>
+          <p class="aside">
+            This is an art experiment, not an accessibility tool. Real audio description and captions
+            do things a pixel-to-pitch mapping can't.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HOW IT WORKS ============ -->
+    <section class="section how" id="how">
+      <div class="section-head">
+        <span class="section-num">02</span>
+        <h2>How it works</h2>
+      </div>
+      <div class="how-grid">
+        <article class="how-card how-a">
+          <h3>Image <span aria-hidden="true">→</span> Sound</h3>
+          <ol class="steps">
+            <li><span class="step-key k-red">1</span><div><strong>Load</strong> an artwork of any size.</div></li>
+            <li><span class="step-key k-orange">2</span><div><strong>Squint.</strong> It's shrunk to a grid, like squinting at a painting. Height is fixed because rows become pitches. Width keeps the proportions, so wide paintings play longer.</div></li>
+            <li><span class="step-key k-yellow">3</span><div><strong>Read.</strong> Every cell is measured as hue, saturation and value.</div></li>
+            <li><span class="step-key k-cream">4</span><div><strong>Map.</strong> A method turns those numbers into notes, snapped to a musical scale.</div></li>
+            <li><span class="step-key k-white">5</span><div><strong>Play.</strong> Listen to a quick preview, or export MIDI and give it real instruments in GarageBand or BandLab.</div></li>
+          </ol>
+        </article>
+        <article class="how-card how-b">
+          <h3>Sound <span aria-hidden="true">→</span> Image</h3>
+          <ol class="steps">
+            <li><span class="step-key k-ink">1</span><div><strong>Load</strong> a song or recording.</div></li>
+            <li><span class="step-key k-ink">2</span><div><strong>Listen.</strong> About 43 times a second, the engine measures loudness, which of the 12 notes are sounding, how bright the tone is, and where new hits land.</div></li>
+            <li><span class="step-key k-ink">3</span><div><strong>Map.</strong> A method turns those measurements into shapes, strokes and colors. Notes become hues on Scriabin's color keyboard.</div></li>
+            <li><span class="step-key k-ink">4</span><div><strong>Paint.</strong> Press play and watch each image follow the song.</div></li>
+          </ol>
+        </article>
+      </div>
+      <p class="tech">
+        Under the hood: the translation engine is written in Python with NumPy and Pillow,
+        and runs inside your browser through Pyodide (Python compiled to WebAssembly).
+        The first visit downloads the engine (about 15&nbsp;MB) and after that it's cached.
+      </p>
+    </section>
+
+    <!-- ============ METHODS ============ -->
+    <section class="section methods" id="methods">
+      <div class="section-head">
+        <span class="section-num">03</span>
+        <h2>Methods</h2>
+      </div>
+      <div class="methods-grid">
+        <div>
+          <h3 class="methods-title">Image <span aria-hidden="true">→</span> Sound <span class="count">8</span></h3>
+          <ul class="method-list" id="list-a"></ul>
+        </div>
+        <div>
+          <h3 class="methods-title">Sound <span aria-hidden="true">→</span> Image <span class="count">12</span></h3>
+          <ul class="method-list" id="list-b"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DEMOS ============ -->
+    <section class="section demos" id="demos">
+      <div class="section-head">
+        <span class="section-num">04</span>
+        <h2>Demos</h2>
+      </div>
+      <div class="demo-grid" id="demo-grid">
+        <div class="demo-empty">
+          <span class="demo-frame" aria-hidden="true"></span>
+          <p>Sample artworks and recordings are coming soon. Until then, load your own: try a painting with strong contrast, or a song with a clear chorus.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-brand"><span class="mark">SYN-1</span> Translator</div>
+    <div class="footer-cols">
+      <p><strong>Ideas borrowed from</strong> Wassily Kandinsky (colors as instruments), Alexander Scriabin (notes as colors),
+        Peter Meijer's vOICe (scan-line hearing) and Ernst Chladni (sand figures).</p>
+      <p><strong>Design</strong> inspired by vintage drum-machine hardware and Roland50.studio.</p>
+      <p><a href="https://github.com/CrunchyBoba/image-sound-translator" target="_blank" rel="noopener">Source on GitHub ↗</a></p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.venv-*/
+.pytest_cache/
+
+# results from cli.py
+output/
+
+# editors and OS
+.DS_Store
+.vscode/
+.idea/

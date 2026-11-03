@@ -1,0 +1,4 @@
+numpy>=1.24
+pillow>=10.0
+soundfile>=0.12   # only for cli.py (reading audio files)
+pytest>=7         # only for running the tests
