@@ -24,7 +24,8 @@ def convert(image, rows=36, step=0.25, width_factor=2):
     pitches = make_pitches(rows)
 
     notes = []
-    for region in range(COLORS):
+    # images with fewer than COLORS distinct colors get fewer regions
+    for region in np.unique(labels):
         # the region's average color -> instrument
         r, g, b = palette[region * 3: region * 3 + 3]
         h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)

@@ -246,7 +246,7 @@ function readoutHTML(index, method, status = "") {
 /* ------------------------------------------------- machine A: image→sound */
 
 const machineA = {
-  file: null, grid: null, method: IMAGE_METHODS[0].slug, render: null, stale: false,
+  file: null, grid: null, method: IMAGE_METHODS[0].slug, render: null, composing: false,
   knobs: {}, raf: null, gridTimer: null,
 
   init() {
@@ -271,29 +271,34 @@ const machineA = {
 
   async load(file) {
     if (!file.type.startsWith("image/")) { toast("That doesn't look like an image. Try a PNG, JPG or WEBP.", true); return; }
+    if (this.composing) { toast("Wait for the sound to finish composing, then load the new artwork."); return; }
     this.stop();
+    this.updateReadout(engine.state === "ready" ? "Reading the artwork…" : "Waiting for the engine to finish loading…");
+    let size;
+    try {
+      // the engine only replaces its current artwork if this one opens correctly
+      size = await engine.loadImage(new Uint8Array(await file.arrayBuffer()));
+    } catch (error) {
+      console.error(error);
+      toast("Couldn't read that image. Try a PNG, JPG or WEBP.", true);
+      this.updateReadout(this.file ? "Kept the previous artwork." : "");
+      return;
+    }
     this.file = file;
     this.render = null;
+    setDownload($("#a-wav"), null);
+    setDownload($("#a-midi"), null);
     $("#a-file-name").textContent = file.name;
     const thumb = $("#a-thumb-img");
     if (thumb.src) URL.revokeObjectURL(thumb.src);
     thumb.src = URL.createObjectURL(file);
+    $("#a-thumb-cap").textContent = `${size.width} × ${size.height}px`;
     $("#a-thumb").hidden = false;
     $("#a-drop").hidden = true;
     $("#a-grid-wrap").hidden = false;
-    this.updateReadout(engine.state === "ready" ? "Reading the artwork…" : "Waiting for the engine to finish loading…");
-    try {
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      const size = await engine.loadImage(bytes);
-      $("#a-thumb-cap").textContent = `${size.width} × ${size.height}px`;
-      await this.refreshGrid();
-      this.updateReadout("Ready. Press Start to hear it.");
-      this.updateButtons();
-    } catch (error) {
-      console.error(error);
-      toast("Couldn't read that image. Try another file.", true);
-      this.updateReadout();
-    }
+    await this.refreshGrid();
+    this.updateReadout("Ready. Press Start to hear it.");
+    this.updateButtons();
   },
 
   async refreshGrid() {
@@ -306,8 +311,8 @@ const machineA = {
     this.draw();
   },
 
-  knobChanged(name, value) {
-    if (this.render) this.stale = true;
+  knobChanged(name) {
+    if (!this.audio.paused) this.stop();  // the old sound no longer matches the new settings
     if (name !== "step") {
       clearTimeout(this.gridTimer);
       this.gridTimer = setTimeout(() => this.refreshGrid(), 120);
@@ -336,11 +341,12 @@ const machineA = {
   },
 
   async start() {
-    if (!this.grid) return;
+    if (!this.grid || this.composing) return;
     const { rows, step, detail } = this.settings();
     const key = `${this.method}|${rows}|${step}|${detail}`;
     const button = $("#a-start");
     if (!this.render || this.render.key !== key) {
+      this.composing = true;
       button.classList.add("is-busy");
       button.textContent = "Wait";
       button.disabled = true;
@@ -350,23 +356,31 @@ const machineA = {
         if (this.render) { URL.revokeObjectURL(this.render.wavUrl); if (this.render.midiUrl) URL.revokeObjectURL(this.render.midiUrl); }
         const wavUrl = URL.createObjectURL(new Blob([result.wav], { type: "audio/wav" }));
         const midiUrl = result.midi ? URL.createObjectURL(new Blob([result.midi], { type: "audio/midi" })) : null;
-        this.render = { key, wavUrl, midiUrl, timeline: result.timeline, seconds: result.seconds };
+        this.render = { key, wavUrl, midiUrl, timeline: result.timeline, seconds: result.seconds, heard: result.heard };
         this.audio.src = wavUrl;
         const name = `${baseName(this.file)}-${this.method}`;
-        setDownload($("#a-wav"), wavUrl, `${name}.wav`);
-        setDownload($("#a-midi"), midiUrl, `${name}.mid`);
+        setDownload($("#a-wav"), result.heard ? wavUrl : null, `${name}.wav`);
+        setDownload($("#a-midi"), result.heard ? midiUrl : null, `${name}.mid`);
       } catch (error) {
         console.error(error);
         toast("Something went wrong while composing. Try another method or setting.", true);
         this.updateReadout();
         return;
       } finally {
+        this.composing = false;
         button.classList.remove("is-busy");
         button.textContent = "Start";
         button.disabled = false;
       }
+      // the method or a knob changed while composing: compose the newest choice instead
+      const now = this.settings();
+      if (`${this.method}|${now.rows}|${now.step}|${now.detail}` !== key) return this.start();
     }
-    this.stale = false;
+    if (!this.render.heard) {
+      this.stop();
+      this.updateReadout("This method found nothing to play here: the artwork is too dark, too plain, or has no clear edges. Try Scan line, or turn up Rows.");
+      return;
+    }
     const method = IMAGE_METHODS.find((m) => m.slug === this.method);
     this.updateReadout(method.audioOnly ? "Playing. This method makes audio only, so there's no MIDI file." : "Playing.");
     this.audio.currentTime = 0;
@@ -463,14 +477,31 @@ const machineB = {
   async load(file) {
     const looksLikeAudio = file.type.startsWith("audio/") || /\.(mp3|wav|ogg|oga|flac|m4a|aac|webm)$/i.test(file.name);
     if (!looksLikeAudio) { toast("That doesn't look like a sound file. Try an MP3, WAV or M4A.", true); return; }
+    if (this.busy) { toast("Wait for the current painting to finish, then load the new sound."); return; }
     this.pause();
-    this.file = file;
-    $("#b-file-name").textContent = file.name;
+    this.setBusy(true);
     this.updateReadout("Listening…");
-    let decoded;
+    const previousStatus = this.file ? "Kept the previous sound." : "";
+    let buffer, decoded;
     try {
-      const buffer = await file.arrayBuffer();
+      buffer = await file.arrayBuffer();
       decoded = await decodeAudio(buffer);
+    } catch (error) {
+      console.error(error);
+      toast("Couldn't decode that sound file. Try an MP3 or WAV.", true);
+      this.setBusy(false);
+      this.updateReadout(previousStatus);
+      return;
+    }
+    if (decoded.seconds < 0.25) {
+      toast("That sound is too short to picture. Try something at least a second long.", true);
+      this.setBusy(false);
+      this.updateReadout(previousStatus);
+      return;
+    }
+    try {
+      this.file = file;
+      $("#b-file-name").textContent = file.name;
       this.seconds = decoded.seconds;
       this.peaks = this.makePeaks(decoded.left, 600);
       for (const image of Object.values(this.images)) URL.revokeObjectURL(image.url);
@@ -489,16 +520,18 @@ const machineB = {
       const raw = new Uint8Array(buffer.slice(0, 16 * 1024 * 1024));
       this.updateReadout(engine.state === "ready" ? "Analyzing…" : "Waiting for the engine to finish loading…");
       await engine.loadSound(decoded, raw);
-      $("#b-run").disabled = false;
-      $("#b-all").disabled = false;
       $("#b-play").disabled = false;
       const note = decoded.seconds >= 359 ? " Only the first 6 minutes are used." : "";
       this.updateReadout(`Ready: ${formatTime(decoded.seconds)} of sound.${note} Pick a method and press Run.`);
       this.tick(true);
     } catch (error) {
       console.error(error);
-      toast("Couldn't decode that sound file. Try an MP3 or WAV.", true);
+      this.file = null;
+      $("#b-file-name").textContent = "None loaded";
+      toast("The engine couldn't read that sound. Try an MP3 or WAV.", true);
       this.updateReadout();
+    } finally {
+      this.setBusy(false);
     }
   },
 
@@ -546,12 +579,13 @@ const machineB = {
     $("#b-readout").innerHTML = readoutHTML(index, SOUND_METHODS[index], status);
   },
 
-  setBusy(busy) {
+  setBusy(busy, label = "Listening…") {
     this.busy = busy;
     $("#b-run").disabled = busy || !this.file;
     $("#b-all").disabled = busy || !this.file;
     $("#b-run").classList.toggle("is-busy", busy);
     $("#b-frame").classList.toggle("is-working", busy);
+    $("#b-frame").dataset.label = label;
     $("#engine-led").dataset.state = busy ? "busy" : engine.state;
   },
 
@@ -573,7 +607,7 @@ const machineB = {
 
   async run(slug) {
     if (!this.file || this.busy) return;
-    this.setBusy(true);
+    this.setBusy(true, "Painting…");
     this.updateReadout("Painting…");
     try {
       await this.make(slug);
@@ -589,7 +623,7 @@ const machineB = {
 
   async runAll() {
     if (!this.file || this.busy) return;
-    this.setBusy(true);
+    this.setBusy(true, "Painting…");
     try {
       for (const [i, method] of SOUND_METHODS.entries()) {
         this.updateReadout(`Painting ${i + 1} of ${SOUND_METHODS.length}: ${method.name}…`);

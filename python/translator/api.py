@@ -57,7 +57,7 @@ def make_sound(method, rows=36, step=0.25, detail=2.0):
     file (or None), and a timeline so the website can move a playhead."""
     rows, step, detail = int(rows), float(step), float(detail)
     image = _state["image"]
-    wav, midi = image_to_sound.run(method, image, rows, step, detail)
+    wav, midi, heard = image_to_sound.run(method, image, rows, step, detail)
     cols = shrink(image, rows, detail).width
 
     timeline = {"kind": "columns", "step": step, "cols": cols, "period": None}
@@ -71,8 +71,10 @@ def make_sound(method, rows=36, step=0.25, detail=2.0):
     elif method == "hilbert":
         timeline["kind"] = "curve"
 
+    if not heard:
+        timeline["kind"] = "silent"
     seconds = (len(wav) - 44) / 2 / SAMPLE_RATE
-    return {"wav": wav, "midi": midi, "timeline": timeline, "seconds": seconds}
+    return {"wav": wav, "midi": midi, "timeline": timeline, "seconds": seconds, "heard": heard}
 
 
 # ---------------- Sound -> Image ----------------

@@ -33,6 +33,9 @@ def prepare(left, right, sr, raw_bytes=b""):
         right = np.interp(new, old, right).astype(np.float32)
     limit = MAX_SECONDS * SAMPLE_RATE
     left, right = left[:limit], right[:limit]
+    if len(left) < N_FFT:  # pad very short (or empty) sounds with silence so every step has data
+        left = np.pad(left, (0, N_FFT - len(left)))
+        right = np.pad(right, (0, N_FFT - len(right)))
     mono = (left + right) / 2
     return {
         "y": mono, "stereo": np.array([left, right]), "sr": SAMPLE_RATE,

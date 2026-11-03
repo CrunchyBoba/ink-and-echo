@@ -1,5 +1,6 @@
 {
   "package": "translator",
+  "version": "ff1318297eeb",
   "files": [
     "translator/__init__.py",
     "translator/api.py",

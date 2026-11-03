@@ -45,9 +45,15 @@ const ready = (async () => {
   await pyodide.loadPackage(["numpy", "pillow"]);
 
   status("loading", "Loading translator");
-  const manifest = await (await fetch(new URL("manifest.json", PYTHON_ROOT))).json();
+  // the manifest is never cached; its version makes browsers fetch changed engine files
+  const get = async (url, options) => {
+    const response = await fetch(url, options);
+    if (!response.ok) throw new Error(`Couldn't download ${url} (${response.status})`);
+    return response;
+  };
+  const manifest = await (await get(new URL("manifest.json", PYTHON_ROOT), { cache: "no-cache" })).json();
   for (const file of manifest.files) {
-    const code = await (await fetch(new URL(file, PYTHON_ROOT))).text();
+    const code = await (await get(new URL(`${file}?v=${manifest.version}`, PYTHON_ROOT))).text();
     const path = `/home/pyodide/${file}`;
     pyodide.FS.mkdirTree(path.slice(0, path.lastIndexOf("/")));
     pyodide.FS.writeFile(path, code);

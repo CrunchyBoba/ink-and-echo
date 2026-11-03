@@ -81,10 +81,46 @@ def test_sound_to_image(loaded_sound, method):
     assert np.array(image.convert("L")).std() > 1  # not a blank picture
 
 
-def test_browser_manifest_lists_every_python_file():
+def encode(image, fmt="PNG"):
+    buffer = io.BytesIO()
+    image.save(buffer, format=fmt)
+    return buffer.getvalue()
+
+
+EDGE_IMAGES = {
+    "all-black": (Image.new("RGB", (400, 300)), "PNG"),
+    "one-color": (Image.new("RGB", (400, 300), (20, 120, 220)), "PNG"),
+    "tiny": (Image.new("RGB", (6, 4), (200, 30, 30)), "PNG"),
+    "transparent": (Image.new("RGBA", (300, 200), (0, 0, 0, 0)), "PNG"),
+    "grayscale": (Image.linear_gradient("L").resize((300, 200)), "PNG"),
+    "panorama": (Image.new("RGB", (6000, 400), (240, 240, 240)), "PNG"),
+    "gif": (Image.new("P", (200, 200)), "GIF"),
+}
+
+
+@pytest.mark.parametrize("name", list(EDGE_IMAGES))
+def test_unusual_images_never_crash(name):
+    image, fmt = EDGE_IMAGES[name]
+    api.load_image(encode(image, fmt))
+    for method in IMAGE_METHODS:
+        result = api.make_sound(method)
+        assert result["wav"][:4] == b"RIFF"
+        assert isinstance(result["heard"], bool)
+
+
+@pytest.mark.parametrize("samples", [np.zeros(5 * 22050), np.ones(30), np.zeros(0)], ids=["silent", "30-samples", "empty"])
+def test_unusual_sounds_never_crash(samples):
+    api.load_sound(np.asarray(samples, dtype=np.float32), None, 22050, b"")
+    for method in SOUND_METHODS:
+        Image.open(io.BytesIO(api.make_image(method))).verify()
+
+
+def test_browser_manifest_is_up_to_date():
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from build_manifest import build
+
     manifest = json.loads((ROOT / "python" / "manifest.json").read_text())
-    on_disk = sorted(str(p.relative_to(ROOT / "python")) for p in (ROOT / "python" / "translator").rglob("*.py"))
-    assert sorted(manifest["files"]) == on_disk, "run: python tests/build_manifest.py"
+    assert manifest == build(), "the engine changed: run  python scripts/build_manifest.py"
 
 
 def test_website_methods_match_python():

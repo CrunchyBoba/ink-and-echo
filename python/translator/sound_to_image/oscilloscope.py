@@ -12,8 +12,9 @@ from .colors import colormap, PHOSPHOR
 
 def convert(audio, size=900):
     left, right = audio["stereo"]
-    if np.corrcoef(left, right)[0, 1] > 0.98:     # basically mono
-        delay = audio["sr"] // 400                 # 2.5 milliseconds
+    difference = np.abs(left - right).mean()
+    if difference <= 0.02 * (np.abs(left).mean() + np.abs(right).mean()):  # basically mono (or silent)
+        delay = max(1, min(audio["sr"] // 400, len(audio["y"]) // 2))      # 2.5 milliseconds
         x, y = audio["y"][:-delay], audio["y"][delay:]
     else:
         x, y = (left - right) / 1.4, (left + right) / 1.4   # rotate so center = up

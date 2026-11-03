@@ -6,8 +6,8 @@ There are twenty translation methods, and all of them run in your browser, so yo
 
 **▶ Live site: https://crunchyboba.github.io/ink-and-echo/**
 
-![Image → Sound: a landscape painting read as a dot grid, with the playhead mid-scan](docs/image-to-sound.jpg)
-![Sound → Image: a song painted as a landscape, with a playhead following the music](docs/sound-to-image.jpg)
+![Image → Sound: a landscape painting read as a dot grid, with the playhead mid-scan](docs/screenshots/image-to-sound.jpg)
+![Sound → Image: a song painted as a landscape, with a playhead following the music](docs/screenshots/sound-to-image.jpg)
 
 ---
 
@@ -64,9 +64,10 @@ python/
     image_to_sound/         grid reading, notes, WAV/MIDI writing, 8 methods
     sound_to_image/         audio analysis, colors, brushes, 12 methods
 samples/                    demo artworks and recordings (see samples/README.md)
-tests/                      smoke tests for every method
+scripts/build_manifest.py   refreshes python/manifest.json after engine changes
+tests/                      tests for every method, including unusual files
 cli.py                      run the engine from the terminal
-docs/                       README screenshots
+docs/screenshots/           README images
 ```
 
 ## Run it locally
@@ -87,7 +88,7 @@ python cli.py sound song.mp3 -m landscape      # one Sound → Image method
 python -m pytest                               # run the tests
 ```
 
-If you add, rename or delete a Python file, run `python tests/build_manifest.py` so the browser loads it.
+After changing anything in `python/translator/`, run `python scripts/build_manifest.py` so browsers load the new engine (a test checks this).
 
 ## Adding demos
 
