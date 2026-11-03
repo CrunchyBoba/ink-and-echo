@@ -59,12 +59,12 @@ def main():
     parser.add_argument("-o", "--out", default="output", help="folder for the results")
     args = parser.parse_args()
 
-    out = Path(args.out)
-    out.mkdir(exist_ok=True)
     available = IMAGE_METHODS if args.direction == "image" else SOUND_METHODS
     if args.method and args.method not in available:
         parser.error(f"unknown method '{args.method}'. Choose from: {', '.join(available)}")
     methods = [args.method] if args.method else list(available)
+    out = Path(args.out)
+    out.mkdir(exist_ok=True)
 
     if args.direction == "image":
         image_to_sound(args.file, methods, args.rows, args.step, args.detail, out)

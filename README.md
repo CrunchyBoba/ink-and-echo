@@ -1,10 +1,10 @@
-# SYN-1 Translator
+# Ink & Echo: SYN-1 Translator
 
 **Hear a painting. See a song.**
 SYN-1 reads artwork as a grid of light and color and plays it as music, then listens to music and paints it back.
 There are twenty translation methods, and all of them run in your browser, so your files never leave your device.
 
-**▶ Live site: https://crunchyboba.github.io/image-sound-translator/**
+**▶ Live site: https://crunchyboba.github.io/ink-and-echo/**
 
 ![Image → Sound: a landscape painting read as a dot grid, with the playhead mid-scan](docs/image-to-sound.jpg)
 ![Sound → Image: a song painted as a landscape, with a playhead following the music](docs/sound-to-image.jpg)
