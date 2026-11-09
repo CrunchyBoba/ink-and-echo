@@ -1,8 +1,9 @@
 # Ink & Echo: SYN-1 Translator
 
-**Hear a painting. See a song.**
+**Hear a painting. See a song. Watch a song build a face.**
 SYN-1 reads artwork as a grid of light and color and plays it as music, then listens to music and paints it back.
-There are twenty translation methods, and all of them run in your browser, so your files never leave your device.
+There are twenty translation methods, plus a portrait machine where a song builds a person's face particle by particle.
+Everything runs in your browser, so your files never leave your device.
 
 **▶ Live site: https://crunchyboba.github.io/ink-and-echo/**
 
@@ -28,6 +29,18 @@ painting → sound → painting.
 | 2. **Read.** Measure every cell as hue, saturation and value. | 2. **Map.** Turn those measurements into shapes, strokes and colors (notes become hues on Scriabin's color keyboard). |
 | 3. **Map.** Turn the cells into notes snapped to a scale (instruments follow Kandinsky's color theory). | 3. **Paint.** Render the picture. During playback, a marker follows the song across the image. |
 | 4. **Play.** Listen to a WAV preview, or export MIDI to use real instruments in GarageBand or BandLab. | |
+
+### Song → Face
+
+A portrait becomes a halftone grid of particles: darker parts of the photo get bigger particles, like the dot portraits
+in old graphic design annuals. Then a song snippet builds it. Low notes fill in the shadows and hair, high notes the highlights,
+loud passages build fast, and fresh particles swell on every beat. Choose from 6 particle shapes (circle, ellipse, dash, crescent,
+square, diamond) and 4 color modes: **ink** (black and white), **photo** (the person's real colors), **song** (the color of the
+notes playing when each particle appeared, on Scriabin's color keyboard) and **blend** (the photo's light and dark, tinted by the song).
+*Compare all 24 styles* shows every combination at once.
+
+Backgrounds are removed and faces lined up automatically with Google's MediaPipe, running in the browser. Faces can be saved to a
+gallery, recorded as a video with their music, or exported to publish on the site (see [samples/README.md](samples/README.md)).
 
 ### Methods
 
@@ -55,6 +68,9 @@ assets/
   js/engine.js              talks to the worker, decodes audio
   js/worker.js              loads Pyodide and the Python engine
   js/methods.js             plain-language description of every method
+  js/face/                  Song → Face: align.js (MediaPipe), listen.js (song analysis),
+                            particles.js (halftone + build), studio.js (interface),
+                            store.js (saved gallery), recorder.js (video export)
   img/                      favicon and social preview
 python/
   manifest.json             list of engine files the browser loads
@@ -63,7 +79,7 @@ python/
     tools.py                shared math (NMF, k-means, Hilbert curve, ...)
     image_to_sound/         grid reading, notes, WAV/MIDI writing, 8 methods
     sound_to_image/         audio analysis, colors, brushes, 12 methods
-samples/                    demo artworks and recordings (see samples/README.md)
+samples/                    demos and published faces (see samples/README.md)
 scripts/build_manifest.py   refreshes python/manifest.json after engine changes
 tests/                      tests for every method, including unusual files
 cli.py                      run the engine from the terminal
@@ -101,6 +117,7 @@ They then appear in the site's *Demos* section with a one-click "Load" button. S
 - Alexander Scriabin's color keyboard: notes as colors
 - Peter Meijer's *The vOICe*: hearing images through a scan line
 - Ernst Chladni: sand figures on vibrating plates
+- Halftone dot portraits from print and computer graphic design
 - Visual design inspired by vintage drum-machine hardware and [Roland50.studio](https://roland50.studio)
 
 Made by Aronya Sarker.

@@ -47,6 +47,9 @@
       <button class="mode" role="tab" id="tab-b" data-mode="b" aria-selected="false" aria-controls="machine-b" tabindex="-1">
         <span class="dot" aria-hidden="true"></span>Sound <span class="arrow" aria-hidden="true">→</span><span class="sr-only">to</span> Image
       </button>
+      <button class="mode" role="tab" id="tab-c" data-mode="c" aria-selected="false" aria-controls="machine-c" tabindex="-1">
+        <span class="dot" aria-hidden="true"></span>Song <span class="arrow" aria-hidden="true">→</span><span class="sr-only">to</span> Face
+      </button>
     </nav>
 
     <div class="engine" id="engine" aria-live="polite">
@@ -202,6 +205,132 @@
       <audio id="b-audio" preload="auto"></audio>
     </section>
 
+    <!-- ============ MACHINE C: SONG -> FACE ============ -->
+    <section class="machine machine-c" id="machine-c" role="tabpanel" aria-labelledby="tab-c" hidden>
+      <div class="c-head">
+        <div class="segmented" role="tablist" aria-label="Song to Face view">
+          <button type="button" class="c-view-tab" role="tab" data-view="gallery" aria-selected="true" aria-controls="c-gallery">Gallery</button>
+          <button type="button" class="c-view-tab" role="tab" data-view="make" aria-selected="false" aria-controls="c-make">Make a face</button>
+        </div>
+        <p class="c-intro">Every face is a halftone of particles, and a song builds it. Low notes fill in the shadows, high notes the highlights, and loud passages build fast.</p>
+      </div>
+
+      <!-- gallery: the "marketplace" of faces -->
+      <div class="c-gallery" id="c-gallery" role="tabpanel">
+        <ul class="face-grid" id="face-grid" aria-label="Faces"></ul>
+        <div class="face-empty" id="face-empty">
+          <span class="face-empty-art" aria-hidden="true"></span>
+          <div>
+            <p>No faces yet. Make one from a portrait and a song, and it will be saved here in this browser.</p>
+            <button type="button" class="btn btn-small" id="face-empty-make">Make a face</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- make a face -->
+      <div class="c-make" id="c-make" role="tabpanel" hidden>
+        <div class="c-stage">
+          <div class="c-frame" id="c-frame" data-paper="light">
+            <canvas id="c-canvas" role="img" aria-label="The face being built"></canvas>
+            <label class="drop drop-paper" id="c-drop">
+              <input type="file" id="c-photo" accept="image/png,image/jpeg,image/webp" class="sr-only">
+              <span class="drop-dots" aria-hidden="true"></span>
+              <span class="drop-title">Load a portrait</span>
+              <span class="drop-sub">A clear, front-facing photo works best. The background is removed and the face lined up automatically, right in your browser.</span>
+            </label>
+          </div>
+          <div class="c-transport">
+            <button class="btn btn-start" type="button" id="c-build" disabled>Build</button>
+            <button class="btn btn-stop" type="button" id="c-stop" disabled>Stop</button>
+            <span class="lamp" id="c-lamp" aria-hidden="true"></span>
+            <div class="c-progress" aria-hidden="true"><span id="c-progress"></span></div>
+            <span class="time" id="c-time">0:00 / 0:00</span>
+          </div>
+          <p class="c-status" id="c-status" aria-live="polite"></p>
+        </div>
+
+        <div class="c-controls">
+          <section class="c-step">
+            <h3><span class="step-no">1</span> Portrait</h3>
+            <div class="row">
+              <button class="btn btn-small" type="button" id="c-load-photo">Load photo</button>
+              <span class="file-name" id="c-photo-name">None loaded</span>
+            </div>
+            <div class="chips-row" id="c-chips" hidden>
+              <span class="ok-chip" id="c-chip-face"></span>
+              <span class="ok-chip" id="c-chip-bg"></span>
+            </div>
+            <div class="row checks">
+              <label><input type="checkbox" id="c-remove-bg" checked> Remove background</label>
+              <label><input type="checkbox" id="c-align" checked> Line up the face</label>
+            </div>
+          </section>
+
+          <section class="c-step">
+            <h3><span class="step-no">2</span> Song</h3>
+            <div class="row">
+              <button class="btn btn-small" type="button" id="c-load-song">Load song</button>
+              <input type="file" id="c-song" accept="audio/*,.mp3,.wav,.m4a,.ogg,.flac" class="sr-only">
+              <span class="file-name" id="c-song-name">None loaded</span>
+            </div>
+            <div id="c-snippet" hidden>
+              <canvas class="c-wave" id="c-wave" aria-label="The song. The highlighted part is the snippet; click to move it."></canvas>
+              <div class="sliders">
+                <label>Starts at <output id="c-start-value">0:00</output>
+                  <input type="range" id="c-start" min="0" max="60" step="0.5" value="0"></label>
+                <label>Length <output id="c-length-value">20 s</output>
+                  <input type="range" id="c-length" min="4" max="60" step="1" value="20"></label>
+              </div>
+            </div>
+          </section>
+
+          <section class="c-step">
+            <h3><span class="step-no">3</span> Particles</h3>
+            <span class="mini-label">Shape</span>
+            <div class="pkeys" id="c-shapes" role="radiogroup" aria-label="Particle shape"></div>
+            <span class="mini-label">Color</span>
+            <div class="pkeys pkeys-4" id="c-colors" role="radiogroup" aria-label="Particle color"></div>
+            <div class="row two">
+              <label class="density">Density <output id="c-density-value">64</output>
+                <input type="range" id="c-density" min="36" max="110" step="2" value="64"></label>
+              <fieldset class="paper">
+                <legend>Paper</legend>
+                <label><input type="radio" name="c-paper" value="light" checked> Light</label>
+                <label><input type="radio" name="c-paper" value="dark"> Dark</label>
+              </fieldset>
+            </div>
+            <button class="btn btn-small btn-wide" type="button" id="c-compare" disabled>Compare all 24 styles</button>
+          </section>
+
+          <section class="c-step">
+            <h3><span class="step-no">4</span> Label</h3>
+            <div class="row two">
+              <label class="field">Name <input type="text" id="c-name" maxlength="60" placeholder="Who is this?"></label>
+              <label class="field">Song <input type="text" id="c-song-title" maxlength="80" placeholder="Song title"></label>
+            </div>
+            <label class="check"><input type="checkbox" id="c-caption" checked> Show the name and song on the face</label>
+          </section>
+
+          <section class="c-step c-export">
+            <h3><span class="step-no">5</span> Keep it</h3>
+            <div class="export-buttons">
+              <button class="btn btn-small" type="button" id="c-save" disabled>Save to gallery</button>
+              <button class="btn btn-small" type="button" id="c-record" disabled>Record video</button>
+              <button class="btn btn-small" type="button" id="c-png" disabled>PNG</button>
+              <button class="btn btn-small" type="button" id="c-export" disabled title="Download the files to publish this face on the site">Export for site</button>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div class="nameplate nameplate-c">
+        <span class="np-title">Song <span aria-hidden="true">→</span> Face</span>
+        <span class="np-mid">Computer Portraits</span>
+        <span class="np-model">SYN-1C</span>
+      </div>
+      <audio id="c-audio" preload="auto"></audio>
+    </section>
+
     <!-- ============ ABOUT ============ -->
     <section class="section about" id="about">
       <div class="section-head">
@@ -315,6 +444,37 @@
       <p><a href="https://github.com/CrunchyBoba/ink-and-echo" target="_blank" rel="noopener">Source on GitHub ↗</a></p>
     </div>
   </footer>
+
+  <!-- all 24 particle styles side by side -->
+  <dialog class="sheet" id="compare" aria-labelledby="compare-title">
+    <div class="sheet-head">
+      <h2 id="compare-title">Compare styles</h2>
+      <p>Every particle shape in every color mode, on this face. Click one to use it.</p>
+      <button type="button" class="btn btn-small" id="compare-close">Close</button>
+    </div>
+    <div class="compare-grid" id="compare-grid"></div>
+  </dialog>
+
+  <!-- watch a gallery face being built -->
+  <dialog class="sheet viewer" id="viewer" aria-labelledby="viewer-title">
+    <div class="viewer-body">
+      <canvas id="viewer-canvas" role="img" aria-label="The face being built"></canvas>
+      <div class="viewer-side">
+        <h2 id="viewer-title"></h2>
+        <p id="viewer-song"></p>
+        <div class="viewer-actions">
+          <button class="btn btn-start" type="button" id="viewer-play" disabled>Build</button>
+          <span class="time" id="viewer-time">0:00 / 0:00</span>
+        </div>
+        <div class="export-buttons">
+          <button class="btn btn-small" type="button" id="viewer-record">Record video</button>
+          <button class="btn btn-small" type="button" id="viewer-png">PNG</button>
+          <button class="btn btn-small" type="button" id="viewer-close">Close</button>
+        </div>
+      </div>
+    </div>
+    <audio id="viewer-audio" preload="auto"></audio>
+  </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 </body>

@@ -30,3 +30,34 @@ each with a button that loads it straight into the right machine.
 - `type`: `"artwork"` loads into Image → Sound, and `"audio"` loads into Sound → Image
 - `cover` (optional): an image shown on the card. Artwork demos use the artwork itself.
 - Only use work you made or have permission to share.
+
+# Faces (Song → Face gallery)
+
+Faces you **Save to gallery** stay in your own browser. To show a face to
+everyone on the public site:
+
+1. In **Song → Face → Make a face**, set it up the way you like, then press **Export for site**.
+   It downloads three files: `name.png` (the lined-up portrait), `name-thumb.png` (the finished face)
+   and `name.json` (the settings).
+2. Put the two PNGs in `samples/faces/` and the song file in `samples/audio/`
+   (renamed to match the `audio` path inside `name.json`).
+3. Paste the contents of `name.json` into the `faces` list in `samples/faces.json`:
+
+```json
+{
+  "faces": [
+    {
+      "name": "Abraham Lincoln",
+      "song": "Shenandoah",
+      "portrait": "samples/faces/abraham-lincoln.png",
+      "thumb": "samples/faces/abraham-lincoln-thumb.png",
+      "audio": "samples/audio/shenandoah.mp3",
+      "start": 12,
+      "end": 32,
+      "style": { "shape": "circle", "color": "ink", "density": 64, "paper": "light" }
+    }
+  ]
+}
+```
+
+Only publish portraits of people who agreed to it (or historical figures), and songs you're allowed to share.
