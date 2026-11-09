@@ -173,7 +173,11 @@ function particleColor(p, mode, paper) {
       const [r, g, b] = p.rgb, avg = (r + g + b) / 3;
       return `rgb(${[r, g, b].map((v) => Math.round(Math.min(255, Math.max(0, avg + (v - avg) * 1.35)))).join(",")})`;
     }
-    case "song": return `rgb(${p.song.join(",")})`;
+    case "song": {
+      // on light paper, deepen the colors so pale notes don't disappear
+      const k = paper === "light" ? 0.72 : 1;
+      return `rgb(${p.song.map((v) => Math.round(v * k)).join(",")})`;
+    }
     case "blend": {
       const value = paper === "light" ? 0.12 + 0.75 * p.light : 0.25 + 0.75 * p.light;
       return `rgb(${hsvToRgb(p.hue, 0.55, value).join(",")})`;
