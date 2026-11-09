@@ -1,0 +1,36 @@
+{
+  "about": "Demo cast for the Scanned tab. Barcodes encode each person's birth and death years (plus a check digit); the favorite things and prices are imagined. Photos are public domain, from Wikimedia Commons. Songs are public-domain compositions performed by the site's synthesizer.",
+  "people": [
+    {
+      "name": "Abraham Lincoln",
+      "years": "1809–1865",
+      "photo": { "commons": "File:Abraham Lincoln O-77 matte collodion print.jpg" },
+      "credit": "Photo: Alexander Gardner, 1863. Public domain, via Wikimedia Commons.",
+      "item": "A bottle of writing ink",
+      "price": 4.99,
+      "barcode": "01809018650",
+      "barcodeNote": "Born 1809, died 1865 (the last digit is the check digit).",
+      "song": { "melody": "minuet-in-g" }
+    },
+    {
+      "name": "Marie Curie",
+      "years": "1867–1934",
+      "photo": { "commons": "File:Marie Curie c1920.jpg" },
+      "credit": "Photo: Henri Manuel, c. 1920. Public domain, via Wikimedia Commons.",
+      "item": "A lab notebook",
+      "price": 12.5,
+      "barcode": "01867019340",
+      "barcodeNote": "Born 1867, died 1934 (the last digit is the check digit).",
+      "song": { "melody": "fur-elise" }
+    },
+    {
+      "name": "Albert Einstein",
+      "years": "1879–1955",
+      "photo": { "commons": "File:Einstein 1921 by F Schmutzer - restoration.jpg" },
+      "credit": "Photo: Ferdinand Schmutzer, 1921. Public domain, via Wikimedia Commons.",
+      "item": "His violin, Lina",
+      "priceless": true,
+      "song": { "melody": "ode-to-joy" }
+    }
+  ]
+}

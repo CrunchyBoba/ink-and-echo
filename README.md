@@ -42,6 +42,16 @@ notes playing when each particle appeared, on Scriabin's color keyboard) and **b
 Backgrounds are removed and faces lined up automatically with Google's MediaPipe, running in the browser. Faces can be saved to a
 gallery, recorded as a video with their music, or exported to publish on the site (see [samples/README.md](samples/README.md)).
 
+### Scanned
+
+Each person is scanned like a product at a register. Their face is drawn into the barcode of their favorite thing (the darker the
+face, the thicker the bar). The 12 digits ring 12 notes as the laser reaches them, the price sets the tempo (cheap things hurry,
+expensive things linger), and their favorite song plays only through the black bars, going silent over white space. The last person's
+favorite thing has no barcode. The register says **ITEM NOT FOUND**, and their face and song come through whole.
+
+The tab has a ~2-minute demo (Abraham Lincoln, Marie Curie, Albert Einstein) and, below it, each person on their own with their
+barcode portrait and a short video. Every player can go full screen or **record a video** (MP4 or WebM) of itself.
+
 ### Methods
 
 **Image → Sound (8):** scan line · parameter mapping · Hilbert curve · color regions · contour tracing · wavetable · SVD build-up · NMF build-up
@@ -71,6 +81,8 @@ assets/
   js/face/                  Song → Face: align.js (MediaPipe), listen.js (song analysis),
                             particles.js (halftone + build), studio.js (interface),
                             store.js (saved gallery), recorder.js (video export)
+  js/scan/                  Scanned: barcode.js (UPC-A), music.js (songs, bells, gating),
+                            scene.js (video frames), page.js (players and page)
   img/                      favicon and social preview
 python/
   manifest.json             list of engine files the browser loads
@@ -79,6 +91,7 @@ python/
     tools.py                shared math (NMF, k-means, Hilbert curve, ...)
     image_to_sound/         grid reading, notes, WAV/MIDI writing, 8 methods
     sound_to_image/         audio analysis, colors, brushes, 12 methods
+scanned/people.json         the people in the Scanned tab
 samples/                    demos and published faces (see samples/README.md)
 scripts/build_manifest.py   refreshes python/manifest.json after engine changes
 tests/                      tests for every method, including unusual files
@@ -111,6 +124,14 @@ After changing anything in `python/translator/`, run `python scripts/build_manif
 Put files in `samples/artwork/` or `samples/audio/` and list them in `samples/demos.json`.
 They then appear in the site's *Demos* section with a one-click "Load" button. See [samples/README.md](samples/README.md).
 
+## Adding people to Scanned
+
+Edit `scanned/people.json`. Each person needs a `name`, `years`, `photo`, `item`, and either a `price` and an 11-digit `barcode`
+(the check digit is added for you) or `"priceless": true`. Photos can be a Wikimedia Commons file (`{"commons": "File:..."}`) or a
+file in the repo (`{"src": "scanned/photos/name.jpg"}`). Songs can be a built-in melody (`{"melody": "fur-elise"}`, `"minuet-in-g"`,
+`"ode-to-joy"`) or an audio file you have the rights to use (`{"file": "scanned/songs/name.mp3", "start": 30, "title": "...", "by": "..."}`).
+Ask people before you use their face, and keep the photos you add small.
+
 ## Credits and inspiration
 
 - Wassily Kandinsky, *Concerning the Spiritual in Art*: colors as instruments
@@ -118,6 +139,8 @@ They then appear in the site's *Demos* section with a one-click "Load" button. S
 - Peter Meijer's *The vOICe*: hearing images through a scan line
 - Ernst Chladni: sand figures on vibrating plates
 - Halftone dot portraits from print and computer graphic design
+- Shin Matsunaga's *Montage* (1965): the blue, layered-type look of the Scanned videos
+- Portraits in Scanned: public domain, from Wikimedia Commons (credited in each video)
 - Visual design inspired by vintage drum-machine hardware and [Roland50.studio](https://roland50.studio)
 
 Made by Aronya Sarker.

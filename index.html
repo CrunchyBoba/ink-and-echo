@@ -50,6 +50,9 @@
       <button class="mode" role="tab" id="tab-c" data-mode="c" aria-selected="false" aria-controls="machine-c" tabindex="-1">
         <span class="dot" aria-hidden="true"></span>Song <span class="arrow" aria-hidden="true">→</span><span class="sr-only">to</span> Face
       </button>
+      <button class="mode" role="tab" id="tab-d" data-mode="d" aria-selected="false" aria-controls="machine-d" tabindex="-1">
+        <span class="dot" aria-hidden="true"></span>Scanned
+      </button>
     </nav>
 
     <div class="engine" id="engine" aria-live="polite">
@@ -329,6 +332,28 @@
         <span class="np-model">SYN-1C</span>
       </div>
       <audio id="c-audio" preload="auto"></audio>
+    </section>
+
+    <!-- ============ SCANNED ============ -->
+    <section class="machine machine-d" id="machine-d" role="tabpanel" aria-labelledby="tab-d" hidden>
+      <div class="d-hero">
+        <div class="d-lede">
+          <span class="d-kicker">Scanned · demo · <span id="d-length">≈2:00</span></span>
+          <h2>What is a person worth at the register?</h2>
+          <p>Each person is scanned like a product. Their face is drawn in the barcode of their favorite thing, the barcode plays the music, and their favorite song only gets through the black bars. Unless the thing they love most has no barcode at all.</p>
+          <ol class="d-rules">
+            <li><span>1</span>The face is drawn in the bars: the darker the face, the thicker the bar.</li>
+            <li><span>2</span>The 12 digits ring 12 notes as the scanner reaches them.</li>
+            <li><span>3</span>The price sets the tempo: cheap things hurry, expensive things linger.</li>
+            <li><span>4</span>The song plays over black bars and goes silent over white space.</li>
+          </ol>
+        </div>
+        <div class="d-demo scan-player" id="d-demo">
+          <div class="d-loading"><span class="d-loading-bars" aria-hidden="true"></span><p id="d-status" aria-live="polite">Getting the scanner ready…</p></div>
+        </div>
+      </div>
+      <div class="d-people" id="d-people"></div>
+      <p class="d-note">Demo cast: public-domain photos from Wikimedia Commons, public-domain songs performed by the site's synthesizer. Each barcode encodes the person's birth and death years; the favorite things and prices are imagined. To scan your own people, edit <code>scanned/people.json</code> (see the README).</p>
     </section>
 
     <!-- ============ ABOUT ============ -->

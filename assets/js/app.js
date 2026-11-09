@@ -6,6 +6,7 @@
 import { Engine, decodeAudio } from "./engine.js";
 import { IMAGE_METHODS, SOUND_METHODS, hilbertPoint, rowNoteNames } from "./methods.js";
 import { initFaces, pauseFaces } from "./face/studio.js";
+import { openScanned, pauseScanned } from "./scan/page.js";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -168,9 +169,12 @@ function setMode(mode, { focus = false, scroll = false } = {}) {
   $("#machine-a").hidden = mode !== "a";
   $("#machine-b").hidden = mode !== "b";
   $("#machine-c").hidden = mode !== "c";
+  $("#machine-d").hidden = mode !== "d";
   if (mode !== "a") machineA.stop();
   if (mode !== "b") machineB.pause();
   if (mode !== "c") pauseFaces();
+  if (mode !== "d") pauseScanned();
+  if (mode === "d") openScanned(toast);
   if (mode === "a") machineA.draw();
   storage.set("syn1-mode", mode);
   if (scroll) window.scrollTo({ top: 0, behavior: "smooth" });
@@ -182,7 +186,7 @@ function setupTabs() {
     tab.addEventListener("keydown", (event) => {
       const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
       if (!step) return;
-      const modes = ["a", "b", "c"];
+      const modes = ["a", "b", "c", "d"];
       setMode(modes[(modes.indexOf(currentMode) + step + modes.length) % modes.length], { focus: true });
       event.preventDefault();
     });
@@ -805,4 +809,5 @@ machineB.init();
 buildMethodLists();
 buildDemos();
 initFaces(toast);
-if (location.hash === "#faces" || storage.get("syn1-mode") === "c") setMode("c");
+if (location.hash === "#scanned") setMode("d");
+else if (location.hash === "#faces" || storage.get("syn1-mode") === "c") setMode("c");
